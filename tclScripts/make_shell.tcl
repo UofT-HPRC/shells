@@ -247,9 +247,9 @@ puts "INFO: Project created:$project_name"
 
 if { $start_synth != 0 } {
     update_compile_order -fileset sources_1
-    generate_target all [get_files  $project_path/$project_name.srcs/sources_1/bd/srcs/shell.bd]
-    export_ip_user_files -of_objects [get_files $project_path/$project_name.srcs/sources_1/bd/srcs/shell.bd] -no_script -sync -force -quiet
-    launch_runs -jobs 8 [create_ip_run [get_files -of_objects [get_fileset sources_1] $project_path/$project_name.srcs/sources_1/bd/srcs/shell.bd]]
+    generate_target all [get_files  $project_path/$project_name.srcs/sources_1/bd/shell/shell.bd]
+    export_ip_user_files -of_objects [get_files $project_path/$project_name.srcs/sources_1/bd/shell/shell.bd] -no_script -sync -force -quiet
+    launch_runs -jobs 8 [create_ip_run [get_files -of_objects [get_fileset sources_1] $project_path/$project_name.srcs/sources_1/bd/shell/shell.bd]]
     set ooc_runs [get_runs -filter {IS_SYNTHESIS && name != "synth_1"} ]
     foreach run $ooc_runs { wait_on_run $run}
     
