@@ -54,7 +54,7 @@ find_family () {
 
 if [[ "$#" != 5 && "$#" != 7 && "$#" != 8 ]]; then
   echo "5,7 or 8 arguments expected, got $#"
-  echo "Usage: init.sh /abs/path/to//repository /abs/path/to/vivado /abs/path/to/vivado_hls vivado_version vivado_hls_version [part name] [board] [board name]"
+  echo "Usage: init.sh /abs/path/to/shells/repository /abs/path/to/vivado /abs/path/to/vivado_hls vivado_version vivado_hls_version [part name] [board] [board name]"
   return 1
 fi
 
