@@ -23,6 +23,7 @@ if { $::argc > 0 } {
       "--project_name" { incr i; set project_name [lindex $::argv $i] }
       "--pr_tcl" { incr i; set pr_tcl [lindex $::argv $i] }
       "--start_synth" { incr i; set start_synth [lindex $::argv $i] }
+      "--dir" { incr i; set default_dir [lindex $::argv $i] }
       "--help"         { help }
       default {
         if { [regexp {^-} $option] } {
@@ -64,6 +65,11 @@ set project_path $top_path/projects/$project_name
 if { ! [info exists start_synth] } {
     set start_synth 0
 }    
+if { ! [info exists default_dir] } {
+    set project_path $top_path/projects/$project_name
+} else {
+    set project_path $top_path/projects/$default_dir/$project_name
+}
 create_project $project_name $project_path -part $top_part -force
 
 
