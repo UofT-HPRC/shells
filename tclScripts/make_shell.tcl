@@ -87,7 +87,7 @@ set_msg_config  -ruleid {8}  -id {[BD 41-1271]}  -suppress  -source 2
 set obj [current_project]
 set_property "part" $top_part $obj
 if { [info exists top_board_part] } {
-    set_property board_part $top_board -objects $obj
+    set_property board_part $top_board_part -objects $obj
 }
 if { [file exists $shell_path/tclScripts/shell_prologue.tcl] } {
   set ret_val [source $shell_path/tclScripts/shell_prologue.tcl]
