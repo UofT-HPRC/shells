@@ -518,7 +518,7 @@ proc create_hier_eth10G_zu { parentCell nameHier } {
  ] $CONST_5
 
   # Create instance: xxv_ethernet_0, and set properties
-  set xxv_ethernet_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xxv_ethernet:2.3 xxv_ethernet_0 ]
+  set xxv_ethernet_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xxv_ethernet xxv_ethernet_0 ]
   set_property -dict [ list \
    CONFIG.BASE_R_KR {BASE-R} \
    CONFIG.GT_GROUP_SELECT {Quad_X0Y3} \

@@ -30,7 +30,9 @@ namespace eval 2017.2 {
     xilinx.com:ip:axis_register_slice:1.1\
     xilinx.com:ip:lmb_bram_if_cntlr:4.0\
     xilinx.com:ip:lmb_v10:3.0\
-    xilinx.com:ip:fifo_generator:13.2
+    xilinx.com:ip:fifo_generator:13.2\
+    xilinx.com:ip:zynq_ultra_ps_e:3.1\
+    xilinx.com:ip:xxv_ethernet:2.3
   "
 }
 
@@ -57,6 +59,8 @@ namespace eval 2017.4 {
     xilinx.com:ip:lmb_bram_if_cntlr:4.0\
     xilinx.com:ip:lmb_v10:3.0\
     xilinx.com:ip:fifo_generator:13.2\
+    xilinx.com:ip:zynq_ultra_ps_e:3.1\
+    xilinx.com:ip:xxv_ethernet:2.3
   "
 }
 
@@ -82,15 +86,51 @@ namespace eval 2018.1 {
     xilinx.com:ip:axis_register_slice:1.1\
     xilinx.com:ip:lmb_bram_if_cntlr:4.0\
     xilinx.com:ip:lmb_v10:3.0\
-    xilinx.com:ip:fifo_generator:13.2
+    xilinx.com:ip:fifo_generator:13.2\
+    xilinx.com:ip:zynq_ultra_ps_e:3.1\
+    xilinx.com:ip:xxv_ethernet:2.3
+  "
+}
+
+namespace eval 2018.2 {
+  set ip_list "\ 
+    xilinx.com:ip:axi_bram_ctrl:4.0\
+    xilinx.com:ip:axi_gpio:2.0\
+    xilinx.com:ip:blk_mem_gen:8.4\
+    xilinx.com:ip:clk_wiz:6.0\
+    xilinx.com:ip:xlconstant:1.1\
+    xilinx.com:ip:system_ila:1.1\
+    xilinx.com:ip:util_vector_logic:2.0\
+    xilinx.com:ip:vio:3.0\
+    xilinx.com:ip:util_ds_buf:2.1\
+    xilinx.com:ip:xdma:4.1\
+    xilinx.com:ip:mdm:3.2\
+    xilinx.com:ip:microblaze:10.0\
+    xilinx.com:ip:proc_sys_reset:5.0\
+    xilinx.com:ip:ddr4:2.2\
+    xilinx.com:ip:axi_10g_ethernet:3.1\
+    dlyma.org:dlyma:network_packet_fifo_rx:1.1\
+    dlyma.org:dlyma:network_packet_fifo_tx:1.1\
+    xilinx.com:ip:axis_register_slice:1.1\
+    xilinx.com:ip:lmb_bram_if_cntlr:4.0\
+    xilinx.com:ip:lmb_v10:3.0\
+    xilinx.com:ip:fifo_generator:13.2\
+    xilinx.com:ip:zynq_ultra_ps_e:3.2\
+    xilinx.com:ip:xxv_ethernet:2.4
   "
 }
 
 # defines get_design_name
-source ${::env(GALAPAGOS_PATH)}/tclScripts/utilities.tcl
+if { [info exists ::env(GALAPAGOS_PATH)] } {
+    source ${::env(GALAPAGOS_PATH)}/shells/tclScripts/utilities.tcl
+    # defines procs for creating IPs/hierarchies
+    source ${::env(GALAPAGOS_PATH)}/shells/tclScripts/shell_procs.tcl
+} else {
+    source ${::env(SHELLS_PATH)}/tclScripts/utilities.tcl
+    # defines procs for creating IPs/hierarchies
+    source ${::env(SHELLS_PATH)}/tclScripts/shell_procs.tcl
+}
 
-# defines procs for creating IPs/hierarchies
-source ${::env(GALAPAGOS_PATH)}/tclScripts/shell_procs.tcl
 
 # determine Vivado version
 set current_vivado_version [version -short]
@@ -100,6 +140,8 @@ if { [string first 2017.2 $current_vivado_version] != -1 } {
   set version 2017.4
 } elseif { [string first 2018.1 $current_vivado_version] != -1 } {
   set version 2018.1
+} elseif { [string first 2018.2 $current_vivado_version] != -1 } {
+  set version 2018.2
 } else {
   puts ""
   catch {common::send_msg_id "BD_TCL-109" "ERROR" "Unsupported Vivado version:\
@@ -453,7 +495,7 @@ proc create_root_design { parentCell } {
 #  ] $xlconstant_5
 
   # Create instance: zynq_ultra_ps_e_0, and set properties
-  set zynq_ultra_ps_e_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.1 zynq_ultra_ps_e_0 ]
+  set zynq_ultra_ps_e_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0 ]
   set_property -dict [ list \
    CONFIG.PSU_BANK_0_IO_STANDARD {LVCMOS33} \
    CONFIG.PSU_BANK_1_IO_STANDARD {LVCMOS33} \
@@ -957,7 +999,7 @@ proc create_root_design { parentCell } {
 connect_bd_net [get_bd_ports qsfp0_sel_1v8_l] [get_bd_pins ethernet/qsfp0_lp_mode_1v8]
 # connect_bd_net [get_bd_ports perst_n] [get_bd_pins util_vector_logic_0/Op1]
 # connect_bd_net [get_bd_pins ethernet/ext_reset_n] [get_bd_pins util_vector_logic_0/Op2]
-connect_bd_net [get_bd_pins [get_bd_pins ethernet/ext_reset_n] [get_bd_pins util_vector_logic_1/Op1]
+connect_bd_net [get_bd_pins ethernet/ext_reset_n] [get_bd_pins util_vector_logic_1/Op1]
 connect_bd_net [get_bd_pins util_vector_logic_1/Res] [get_bd_pins mem_interface/sys_rst]
 # connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins mem_interface/S_ARESETN]
 connect_bd_net [get_bd_pins ethernet/tx_clk_out_0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
