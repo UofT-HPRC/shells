@@ -10,9 +10,6 @@ guard-%:
 		exit 1; \
 	fi
 
-
-.PHONY: middleware
-
 all: example 
 
 synth = 1 
@@ -32,6 +29,4 @@ app_dev: guard-PROJECTNAME
 	vivado -mode gui -source ./tclScripts/make_shell.tcl -tclargs --project_name ${PROJECTNAME}
 
 clean:
-	 rm -rf projects/project_name
-
-
+	rm -rf projects/project_name

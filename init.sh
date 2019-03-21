@@ -69,10 +69,17 @@ if [[ "$#" > 5 ]]; then
 fi
 if [[ "$#" > 7 ]]; then
   board=$8
-  
 fi
 
+# TODO prefix all "shells" with galapagos_
 configFile=~/.shells
+
+# remove all GALAPAGOS variables from env and comment out the init if it exists 
+if [[ ! -z $GALAPAGOS_PATH ]]; then
+  unset "${!GALAPAGOS@}"
+  sed -i '/# added by galapagos/s/^/#/' ~/.bashrc
+  source ~/.bashrc
+fi
 
 if [[ -f $configFile ]]; then
   echo "Updating shells initialization..."
@@ -80,6 +87,7 @@ if [[ -f $configFile ]]; then
   rm $configFile
 fi
 
+# TODO make versions into a list and print supported versions on 'else' path
 if [[ $hlsVersion == "2017.2" ]]; then
   hlsPath_append=$hlsPath/$hlsVersion
 elif [[ $hlsVersion == "2017.4" ]]; then
@@ -122,6 +130,7 @@ if [[ "$#" == 8 ]]; then
   echo "export SHELLS_BOARD=$board" >> $configFile
 fi
 
+# TODO print supported boards as help
 cat >> $configFile <<EOF
 
 shells-update-board() {
@@ -192,6 +201,9 @@ EOF
 source $configFile
 source $vivadoPath_append/settings64.sh
 
+# if it doesn't exist in the .bashrc, add it. Otherwise, uncomment it in case
 if ! grep -Fq "# added by shells" ~/.bashrc; then 
   echo "source $configFile # added by shells" >> ~/.bashrc
+else
+  sed -i '/# added by shells/s/^#//' ~/.bashrc
 fi

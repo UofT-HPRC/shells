@@ -41,40 +41,43 @@ if { $::argc > 0 } {
 set orig_proj_dir "[file normalize "projects/$project_name"]"
 
 if { [info exists ::env(GALAPAGOS_PATH)] } {
-    set top_path ${::env(GALAPAGOS_PATH)}
-    set top_shells ${::env(GALAPAGOS_PATH)}/shells
-    set shell_path ${::env(GALAPAGOS_PATH)}/shells/${::env(GALAPAGOS_BOARD_NAME)}
-    set top_part ${::env(GALAPAGOS_PART)}
-    set top_board ${::env(GALAPAGOS_BOARD_NAME)}
-
-    if { [info exists ::env(GALAPAGOS_BOARD)] } {
-        set top_board_part ${::env(GALAPAGOS_BOARD)}
-    }
+  set top_path ${::env(GALAPAGOS_PATH)}
+  set top_shells ${::env(GALAPAGOS_PATH)}/shells
+  set top_part ${::env(GALAPAGOS_PART)}
+  set top_board ${::env(GALAPAGOS_BOARD_NAME)}
+  set vivado_version ${::env(GALAPAGOS_VIVADO_VERSION)}
+  if { [info exists ::env(GALAPAGOS_BOARD)] } {
+    set top_board_part ${::env(GALAPAGOS_BOARD)}
+  }
 } else {
-    set top_path ${::env(SHELLS_PATH)}
-    set top_shells $top_path 
-    set top_part ${::env(SHELLS_PART)}
-    set top_board ${::env(SHELLS_BOARD_NAME)}
-    if { [info exists ::env(SHELLS_BOARD)] } {
-        set top_board_part ${::env(SHELLS_BOARD)}
-    }
+  set top_path ${::env(SHELLS_PATH)}
+  set top_shells $top_path 
+  set top_part ${::env(SHELLS_PART)}
+  set top_board ${::env(SHELLS_BOARD_NAME)}
+  set vivado_version ${::env(SHELLS_VIVADO_VERSION)}
+  if { [info exists ::env(SHELLS_BOARD)] } {
+    set top_board_part ${::env(SHELLS_BOARD)}
+  }
+}
+set shell_path $top_shells/$top_board
+
+# assert that the board part exists
+if { [info exists top_board_part] } {
+  if { [lsearch [get_board_parts] $top_board_part] == -1 } {
+    puts "Board part $top_board_part not found in this version of Vivado"
+    return 1
+  }
 }
 
-set shell_path $top_shells/$top_board
-set project_path $top_path/projects/$project_name
 if { ! [info exists start_synth] } {
-    set start_synth 0
-}    
+  set start_synth 0
+}
 if { ! [info exists default_dir] } {
-    set project_path $top_path/projects/$project_name
+  set project_path $top_path/projects/$top_board/$vivado_version/$project_name
 } else {
-    set project_path $top_path/projects/$default_dir/$project_name
+  set project_path $top_path/projects/$default_dir/$project_name
 }
 create_project $project_name $project_path -part $top_part -force
-
-
-
-
 
 # Set the directory path for the new project
 # set proj_dir [get_property directory [current_project]]
