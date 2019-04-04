@@ -12,7 +12,7 @@ struct ap_axis{
 #define DMA 1
 
 
-void hlsTest(
+void dma_example(
              float  * mem ,            // global memory pointer
              hls::stream<ap_axis> *stream_in,                
              hls::stream<ap_axis> *stream_out

@@ -28,7 +28,8 @@ module shellTop(
     FIXED_IO_ps_porb,
     FIXED_IO_ps_srstb,
     leds,
-    btns
+    btns,
+    sw
 );
 
     inout [14:0]DDR_addr;
@@ -54,6 +55,7 @@ module shellTop(
     inout FIXED_IO_ps_srstb;
     output [3:0] leds;
     input [3:0] btns;
+    input [1:0] sw;
 
     (* keep = "true" *) wire [0:0]ARESETN;
     (* keep = "true" *) wire CLK_DATA;
@@ -115,7 +117,7 @@ module shellTop(
     (* keep = "true" *) wire [1:0] S_AXI_MEM_0_bid;
     (* keep = "true" *) wire S_AXI_MEM_0_bready;
     (* keep = "true" *) wire S_AXI_MEM_0_rready;
-    (* keep = "true" *) wire [511:0] S_AXI_MEM_0_wdata;
+    (* keep = "true" *) wire [63:0] S_AXI_MEM_0_wdata;
     (* keep = "true" *) wire S_AXI_MEM_0_wlast;
     (* keep = "true" *) wire [63:0] S_AXI_MEM_0_wstrb;
     (* keep = "true" *) wire S_AXI_MEM_0_wvalid;
@@ -123,7 +125,7 @@ module shellTop(
     (* keep = "true" *) wire S_AXI_MEM_0_awready;
     (* keep = "true" *) wire [1:0] S_AXI_MEM_0_bresp;
     (* keep = "true" *) wire S_AXI_MEM_0_bvalid;
-    (* keep = "true" *) wire [511:0] S_AXI_MEM_0_rdata;
+    (* keep = "true" *) wire [63:0] S_AXI_MEM_0_rdata;
     (* keep = "true" *) wire [1:0]S_AXI_MEM_0_rid;
     (* keep = "true" *) wire S_AXI_MEM_0_rlast;
     (* keep = "true" *) wire [1:0] S_AXI_MEM_0_rresp;
@@ -154,7 +156,7 @@ module shellTop(
     (* keep = "true" *) wire [1:0] S_AXI_MEM_1_bid;
     (* keep = "true" *) wire S_AXI_MEM_1_bready;
     (* keep = "true" *) wire S_AXI_MEM_1_rready;
-    (* keep = "true" *) wire [127:0] S_AXI_MEM_1_wdata;
+    (* keep = "true" *) wire [63:0] S_AXI_MEM_1_wdata;
     (* keep = "true" *) wire S_AXI_MEM_1_wlast;
     (* keep = "true" *) wire [63:0] S_AXI_MEM_1_wstrb;
     (* keep = "true" *) wire S_AXI_MEM_1_wvalid;
@@ -162,7 +164,7 @@ module shellTop(
     (* keep = "true" *) wire S_AXI_MEM_1_awready;
     (* keep = "true" *) wire [1:0] S_AXI_MEM_1_bresp;
     (* keep = "true" *) wire S_AXI_MEM_1_bvalid;
-    (* keep = "true" *) wire [127:0] S_AXI_MEM_1_rdata;
+    (* keep = "true" *) wire [63:0] S_AXI_MEM_1_rdata;
     (* keep = "true" *) wire [1:0]S_AXI_MEM_1_rid;
     (* keep = "true" *) wire S_AXI_MEM_1_rlast;
     (* keep = "true" *) wire [1:0] S_AXI_MEM_1_rresp;
@@ -312,7 +314,10 @@ module shellTop(
         .FIXED_IO_mio(FIXED_IO_mio),
         .FIXED_IO_ps_clk(FIXED_IO_ps_clk),
         .FIXED_IO_ps_porb(FIXED_IO_ps_porb),
-        .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb)
+        .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb),
+        .leds(leds),
+        .btns(btns),
+        .sw(sw)
     );
 
    pr pr_i(

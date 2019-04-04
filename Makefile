@@ -13,12 +13,13 @@ guard-%:
 all: example 
 
 synth = 1 
-pr_tcl = ./hlsTest/pr_bd.tcl
+pr_tcl = ./hlsTest/dma_example/tclScripts/pr_bd.tcl
 
 
 hlsExample:
 	mkdir -p hlsBuild
-	vivado_hls ./hlsTest/generate_hls.tcl 
+	# vivado_hls ./hlsTest/generate_hls.tcl 
+	./hlsTest/generate.sh dma_example
 
 example: hlsExample
 	mkdir -p projects

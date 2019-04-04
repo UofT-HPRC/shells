@@ -81,9 +81,7 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
-xilinx.com:ip:smartconnect:1.0\
-xilinx.com:hls:hlsTest:1.0\
-xilinx.com:ip:xlconstant:1.1\
+xilinx.com:hls:shell_test:1.0\
 "
 
    set list_ips_missing ""
@@ -198,7 +196,7 @@ proc create_root_design { parentCell } {
   set S_AXI_MEM_0 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI_MEM_0 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH {32} \
-   CONFIG.DATA_WIDTH {512} \
+   CONFIG.DATA_WIDTH {64} \
    CONFIG.FREQ_HZ {156250000} \
    CONFIG.NUM_READ_OUTSTANDING {2} \
    CONFIG.NUM_WRITE_OUTSTANDING {2} \
@@ -207,7 +205,7 @@ proc create_root_design { parentCell } {
   set S_AXI_MEM_1 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI_MEM_1 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH {32} \
-   CONFIG.DATA_WIDTH {512} \
+   CONFIG.DATA_WIDTH {64} \
    CONFIG.FREQ_HZ {156250000} \
    CONFIG.NUM_READ_OUTSTANDING {2} \
    CONFIG.NUM_WRITE_OUTSTANDING {2} \
@@ -218,38 +216,28 @@ proc create_root_design { parentCell } {
   set ARESETN [ create_bd_port -dir I -type rst ARESETN ]
   set CLK [ create_bd_port -dir I -type clk CLK ]
   set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {S_AXIS:M_AXIS:S_AXI_CONTROL:S_AXI_MEM_0} \
+   CONFIG.ASSOCIATED_BUSIF {S_AXIS:M_AXIS:S_AXI_CONTROL:S_AXI_MEM_0:S_AXI_MEM_1} \
    CONFIG.FREQ_HZ {156250000} \
  ] $CLK
 
-  # Create instance: axi_smc, and set properties
-  set axi_smc [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 axi_smc ]
-  set_property -dict [ list \
-   CONFIG.NUM_SI {2} \
- ] $axi_smc
-
-  # Create instance: hlsTest_0, and set properties
-  set hlsTest_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:hlsTest:1.0 hlsTest_0 ]
-
-  # Create instance: xlconstant_0, and set properties
-  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
+  # Create instance: shell_test_0, and set properties
+  set shell_test_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:shell_test:1.0 shell_test_0 ]
 
   # Create interface connections
-  connect_bd_intf_net -intf_net S_AXIS_1 [get_bd_intf_ports S_AXIS] [get_bd_intf_pins hlsTest_0/stream_in]
-  connect_bd_intf_net -intf_net S_AXI_CONTROL_1 [get_bd_intf_ports S_AXI_CONTROL] [get_bd_intf_pins axi_smc/S01_AXI]
-  connect_bd_intf_net -intf_net axi_smc_M00_AXI [get_bd_intf_ports S_AXI_MEM_0] [get_bd_intf_pins axi_smc/M00_AXI]
-  connect_bd_intf_net -intf_net hlsTest_0_m_axi_mem [get_bd_intf_pins axi_smc/S00_AXI] [get_bd_intf_pins hlsTest_0/m_axi_mem]
-  connect_bd_intf_net -intf_net hlsTest_0_stream_out [get_bd_intf_ports M_AXIS] [get_bd_intf_pins hlsTest_0/stream_out]
+  connect_bd_intf_net -intf_net S_AXIS_1 [get_bd_intf_ports S_AXIS] [get_bd_intf_pins shell_test_0/stream_in]
+  connect_bd_intf_net -intf_net S_AXI_CONTROL_1 [get_bd_intf_ports S_AXI_CONTROL] [get_bd_intf_pins shell_test_0/s_axi_ctrl_bus]
+  connect_bd_intf_net -intf_net shell_test_0_m_axi_mem_0 [get_bd_intf_ports S_AXI_MEM_0] [get_bd_intf_pins shell_test_0/m_axi_mem_0]
+  connect_bd_intf_net -intf_net shell_test_0_m_axi_mem_1 [get_bd_intf_ports S_AXI_MEM_1] [get_bd_intf_pins shell_test_0/m_axi_mem_1]
+  connect_bd_intf_net -intf_net shell_test_0_stream_out [get_bd_intf_ports M_AXIS] [get_bd_intf_pins shell_test_0/stream_out]
 
   # Create port connections
-  connect_bd_net -net ARESETN_1 [get_bd_ports ARESETN] [get_bd_pins axi_smc/aresetn] [get_bd_pins hlsTest_0/ap_rst_n]
-  connect_bd_net -net CLK_1 [get_bd_ports CLK] [get_bd_pins axi_smc/aclk] [get_bd_pins hlsTest_0/ap_clk]
-  connect_bd_net -net xlconstant_0_dout [get_bd_pins hlsTest_0/ap_start] [get_bd_pins xlconstant_0/dout]
+  connect_bd_net -net ARESETN_1 [get_bd_ports ARESETN] [get_bd_pins shell_test_0/ap_rst_n]
+  connect_bd_net -net CLK_1 [get_bd_ports CLK] [get_bd_pins shell_test_0/ap_clk]
 
   # Create address segments
-  create_bd_addr_seg -range 0x000100000000 -offset 0x00000000 [get_bd_addr_spaces hlsTest_0/Data_m_axi_mem] [get_bd_addr_segs S_AXI_MEM_0/Reg] SEG_S_AXI_MEM_0_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x00000000 [get_bd_addr_spaces S_AXI_CONTROL] [get_bd_addr_segs S_AXI_MEM_0/Reg] SEG_S_AXI_MEM_0_Reg
-
+  create_bd_addr_seg -range 0x20000000 -offset 0x00000000 [get_bd_addr_spaces shell_test_0/Data_m_axi_mem_0] [get_bd_addr_segs S_AXI_MEM_0/Reg] SEG_S_AXI_MEM_0_Reg
+  create_bd_addr_seg -range 0x20000000 -offset 0x00000000 [get_bd_addr_spaces shell_test_0/Data_m_axi_mem_1] [get_bd_addr_segs S_AXI_MEM_1/Reg] SEG_S_AXI_MEM_1_Reg
+  create_bd_addr_seg -range 0x00010000 -offset 0x00000000 [get_bd_addr_spaces S_AXI_CONTROL] [get_bd_addr_segs shell_test_0/s_axi_ctrl_bus/Reg] SEG_shell_test_0_Reg
 
   # Restore current instance
   current_bd_instance $oldCurInst
