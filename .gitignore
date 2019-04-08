@@ -5,3 +5,5 @@ vivado*.str
 .vscode/
 hlsBuild/
 .Xil/
+webtalk*.jou
+webtalk*.log

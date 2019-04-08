@@ -44,6 +44,7 @@
 
 #include "lwip/tcp.h"
 #include "xil_cache.h"
+#include "lwip/pbuf.h"
 
 #if LWIP_DHCP==1
 #include "lwip/dhcp.h"
@@ -84,6 +85,9 @@ volatile int rx_bd_count;
 volatile int rx_pkt_count;
 
 struct tcp_pcb* pcb_list[MAX_PCBS];
+struct netif* my_netif_list[MAX_PCBS];
+int CURR_PCB_INDEX = 0;
+volatile int connected = 0;
 
 void
 print_ip(char *msg, struct ip_addr *ip) 
@@ -107,15 +111,60 @@ static void tx_callback(void)
 	tx_bd_count++;
 }
 
+static err_t client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
+{
+	connected = 1;
+
+   return err;
+}
+
 static void rx_callback(uint32_t buf_addr, uint32_t buf_len)
 {
-	int pcb_index = 0;
-	struct tcp_pcb* pcb = pcb_list[pcb_index];
+	int pcb_index = -1;
+	int i;
+	u16_t tdest = *((u16_t *)(buf_addr));
+#ifdef IP_MODE
+	ip_addr_t addr;
+	addr.addr = htonl(((u32)(*(((u32*) TDEST_ADDR) + tdest))) & 0xFFFFFFFF);
+	for(i = 0; i < MAX_PCBS; i++){
+		if(pcb_list[i]->remote_ip.addr == addr.addr){
+			pcb_index = i;
+			break;
+		}
+	}
+	struct tcp_pcb* pcb;
+	if (pcb_index == -1){
+		ip_addr_t local_addr;
+		IP4_ADDR(&local_addr,  192, 168,   1, 114);
+		pcb_list[CURR_PCB_INDEX] = tcp_new();
+		pcb = pcb_list[CURR_PCB_INDEX++];
+		tcp_bind(pcb, &local_addr, 0); //client port for outcoming connection
+		tcp_arg(pcb, NULL);
+		tcp_connect(pcb, &addr, 8000, client_connected); //server port for incoming connection
+		while(!connected){}
+		connected = 0;
+	}
+	else{
+		 pcb = pcb_list[pcb_index];
+	}
 	if(tcp_sndbuf(pcb) > buf_len){
 		tcp_write(pcb, (char*)buf_addr, buf_len, 1);
 	} else {
 		xil_printf("no space in tcp_sndbuf\n\r");
 	}
+#else
+	u64_t addr = ((u64_t)*(((char*) TDEST_ADDR) + 6*tdest)) & 0xFFFFFFFFFFFF;
+	struct netif* netif = my_netif_list[pcb_index];
+	struct pbuf* my_pbuf = pbuf_alloc(PBUF_RAW, (u16_t) buf_len, PBUF_REF);
+	char src[6];
+	memcpy(src, buf_addr, 6);
+	memcpy(buf_addr, buf_addr+6, 6);
+	memcpy(buf_addr+6, src, 6);
+	my_pbuf->payload = (char*) buf_addr;
+	netif->linkoutput(netif, my_pbuf);
+	pbuf_free(my_pbuf);
+#endif
+
 	rx_pkt_count++;
 	rx_bd_count++;
 }
@@ -181,7 +230,7 @@ int main()
 	params.tx_buffer_high   = params.tx_buffer_base + MEM_REGION_BUF_SIZE;
 	params.rx_buffer_base   = params.tx_buffer_high + 1;
 	params.rx_buffer_high   = params.rx_buffer_base + MEM_REGION_BUF_SIZE;
-	params.bd_buf_size      = 32;
+	params.bd_buf_size      = 2048;
 	params.coalesce_count   = 1;
 	params.txIrqPriority    = 0xA0;
 	params.rxIrqPriority    = 0xA0;
@@ -242,9 +291,15 @@ int main()
 	print_ip_settings(&ipaddr, &netmask, &gw);
 
 	Xil_Out16(0x83C00010, 0);
+	*((u32*) TDEST_ADDR) = 0xc0a80167;
+	*((u32*) TDEST_ADDR + 1) = 0xc0a8016c;
 
 	/* start the application (web server, rxtest, txtest, etc..) */
 	start_application();
+
+	//? I was trying to test initiating TCP connections
+	// unsigned char payload[3] = {0,0,0xa};
+	// axisDmaCtrl_sendPackets(payload, 3);
 
 	/* receive and process packets */
 	while (1) {
@@ -256,7 +311,7 @@ int main()
 			tcp_slowtmr();
 			TcpSlowTmrFlag = 0;
 		}
-		xemacif_input(echo_netif);
+		xemacpsif_input(echo_netif);
 		transfer_data();
 	}
   

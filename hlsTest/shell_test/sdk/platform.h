@@ -52,4 +52,8 @@ extern volatile int rx_pkt_count;
 
 #define MAX_PCBS 10
 extern struct tcp_pcb* pcb_list[MAX_PCBS];
+extern struct netif* my_netif_list[MAX_PCBS];
+extern int CURR_PCB_INDEX;
+#define IP_MODE
+#define TDEST_ADDR (XPAR_PS7_DDR_0_S_AXI_BASEADDR + 0x100000)
 #endif

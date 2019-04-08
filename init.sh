@@ -142,6 +142,9 @@ shells-update-board() {
   if [[ \$1 == "pynq-z2" ]]; then
     partName=xc7z020clg400-1
     board=tul.com.tw:pynq-z2:part0:1.0
+  elif [[ \$1 == "zedboard" ]]; then
+    partName=xc7z020clg484-1    
+    board=em.avnet.com:zed:part0:1.3
   elif [[ \$1 == "sidewinder" ]]; then
     partName=xczu19eg-ffvc1760-2-i
     board=fidus.com:sidewinder100:part0:1.0
