@@ -52,33 +52,45 @@ find_family () {
   return 0
 }
 
-if [[ "$#" != 5 && "$#" != 7 && "$#" != 8 ]]; then
+if [[ "$#" != 1 && "$#" != 5 && "$#" != 7 && "$#" != 8 ]]; then
   echo "5,7 or 8 arguments expected, got $#"
   echo "Usage: init.sh /abs/path/to/shells/repository /abs/path/to/vivado /abs/path/to/vivado_hls vivado_version vivado_hls_version [part name] [board] [board name]"
+  echo "Usage: source init.sh OPERATION"
   return 1
 fi
 
-repoPath=$(readlink -f "$1")
-vivadoPath=$(readlink -f "$2")
-hlsPath=$(readlink -f "$3")
-vivadoVersion=$4
-hlsVersion=$5
-if [[ "$#" > 5 ]]; then
-  part=$6
-  board_name=$7
-fi
-if [[ "$#" > 7 ]]; then
-  board=$8
+if [[ "$#" != 1 ]]; then
+  repoPath=$(readlink -f "$1")
+  vivadoPath=$(readlink -f "$2")
+  hlsPath=$(readlink -f "$3")
+  vivadoVersion=$4
+  hlsVersion=$5
+  if [[ "$#" > 5 ]]; then
+    part=$6
+    board_name=$7
+  fi
+  if [[ "$#" > 7 ]]; then
+    board=$8
+  fi
+else
+  operation=$1
 fi
 
 # TODO prefix all "shells" with galapagos_
 configFile=~/.shells
 
-# remove all GALAPAGOS variables from env and comment out the init if it exists 
-if [[ ! -z $GALAPAGOS_PATH ]]; then
-  unset "${!GALAPAGOS@}"
-  sed -i '/# added by galapagos/s/^/#/' ~/.bashrc
-  source ~/.bashrc
+if [[ "$#" == 1 ]]; then
+  if [[ $operation == "switch" ]]; then
+    unset "${!GALAPAGOS@}"
+    sed -i '/# added by galapagos/s/^/#/' ~/.bashrc
+
+    sed -i '/# added by shells/s/^#//' ~/.bashrc
+    source $configFile
+    return 0
+  else
+    echo "Unknown operation: $operation"
+    return 1
+  fi
 fi
 
 if [[ -f $configFile ]]; then
