@@ -50,10 +50,19 @@ extern volatile int tx_bd_count;
 extern volatile int rx_bd_count;
 extern volatile int rx_pkt_count;
 
-#define MAX_PCBS 10
-extern struct tcp_pcb* pcb_list[MAX_PCBS];
-extern struct netif* my_netif_list[MAX_PCBS];
+#include "netif/etharp.h"
+#include "user_options.h"
+
+struct custom_ethernet {
+	struct eth_hdr src;
+	struct netif * netif_ptr;
+};
+
 extern int CURR_PCB_INDEX;
-#define IP_MODE
-#define TDEST_ADDR (XPAR_PS7_DDR_0_S_AXI_BASEADDR + 0x100000)
+
+extern struct tcp_pcb* pcb_list[MAX_PCBS];
+extern struct custom_ethernet my_netif_list[MAX_PCBS];
+extern volatile int connected[MAX_IPS];
+err_t recv_callback(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err);
+
 #endif

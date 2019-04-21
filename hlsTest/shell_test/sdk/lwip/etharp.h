@@ -154,7 +154,6 @@ PACK_STRUCT_END
 #define ETHTYPE_VLAN      0x8100U
 #define ETHTYPE_PPPOEDISC 0x8863U  /* PPP Over Ethernet Discovery Stage */
 #define ETHTYPE_PPPOE     0x8864U  /* PPP Over Ethernet Session Stage */
-#define ETHTYPE_CUSTOM    0x80cbU
 
 /** MEMCPY-like macro to copy to/from struct eth_addr's that are local variables
  * or known to be 32-bit aligned within the protocol header. */
