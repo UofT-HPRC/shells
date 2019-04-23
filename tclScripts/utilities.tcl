@@ -59,3 +59,43 @@ proc get_design_name {design_name} {
 
   return [list $cur_design $design_name $errMsg $nRet]
 }
+
+proc define_env {} {
+  upvar top_path top_path
+  upvar top_shells top_shells
+  upvar top_part top_part
+  upvar top_board top_board
+  upvar vivado_version vivado_version
+  upvar hls_version hls_version
+  upvar top_part_family top_part_family
+  upvar top_board_part top_board_part
+
+  if { [info exists ::env(GALAPAGOS_PATH)] } {
+    set top_path ${::env(GALAPAGOS_PATH)}
+    set top_shells ${::env(GALAPAGOS_PATH)}/shells
+    set top_part ${::env(GALAPAGOS_PART)}
+    set top_board ${::env(GALAPAGOS_BOARD_NAME)}
+    set vivado_version ${::env(GALAPAGOS_VIVADO_VERSION)}
+    set hls_version ${::env(GALAPAGOS_HLS_VERSION)}
+    set top_part_family ${::env(GALAPAGOS_PART_FAMILY)}
+    if { [info exists ::env(GALAPAGOS_BOARD)] } {
+      set top_board_part ${::env(GALAPAGOS_BOARD)}
+    }
+    return 0
+  } elseif { [info exists ::env(SHELLS_PATH)] } {
+    set top_path ${::env(SHELLS_PATH)}
+    set top_shells $top_path 
+    set top_part ${::env(SHELLS_PART)}
+    set top_board ${::env(SHELLS_BOARD_NAME)}
+    set vivado_version ${::env(SHELLS_VIVADO_VERSION)}
+    set hls_version ${::env(SHELLS_HLS_VERSION)}
+    set top_part_family ${::env(SHELLS_PART_FAMILY)}
+    if { [info exists ::env(SHELLS_BOARD)] } {
+      set top_board_part ${::env(SHELLS_BOARD)}
+    }
+    return 0
+  } else {
+    puts "No root path defined: have you sourced init.sh?"
+    return 1
+  }
+}

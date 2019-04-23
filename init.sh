@@ -52,27 +52,46 @@ find_family () {
   return 0
 }
 
-if [[ "$#" != 5 && "$#" != 7 && "$#" != 8 ]]; then
+if [[ "$#" != 1 && "$#" != 5 && "$#" != 7 && "$#" != 8 ]]; then
   echo "5,7 or 8 arguments expected, got $#"
   echo "Usage: init.sh /abs/path/to/shells/repository /abs/path/to/vivado /abs/path/to/vivado_hls vivado_version vivado_hls_version [part name] [board] [board name]"
+  echo "Usage: source init.sh OPERATION"
   return 1
 fi
 
-repoPath=$(readlink -f "$1")
-vivadoPath=$(readlink -f "$2")
-hlsPath=$(readlink -f "$3")
-vivadoVersion=$4
-hlsVersion=$5
-if [[ "$#" > 5 ]]; then
-  part=$6
-  board_name=$7
-fi
-if [[ "$#" > 7 ]]; then
-  board=$8
-  
+if [[ "$#" != 1 ]]; then
+  repoPath=$(readlink -f "$1")
+  vivadoPath=$(readlink -f "$2")
+  hlsPath=$(readlink -f "$3")
+  vivadoVersion=$4
+  hlsVersion=$5
+  if [[ "$#" > 5 ]]; then
+    part=$6
+    board_name=$7
+  fi
+  if [[ "$#" > 7 ]]; then
+    board=$8
+  fi
+else
+  operation=$1
 fi
 
+# TODO prefix all "shells" with galapagos_
 configFile=~/.shells
+
+if [[ "$#" == 1 ]]; then
+  if [[ $operation == "switch" ]]; then
+    unset "${!GALAPAGOS@}"
+    sed -i '/# added by galapagos/s/^/#/' ~/.bashrc
+
+    sed -i '/# added by shells/s/^#//' ~/.bashrc
+    source $configFile
+    return 0
+  else
+    echo "Unknown operation: $operation"
+    return 1
+  fi
+fi
 
 if [[ -f $configFile ]]; then
   echo "Updating shells initialization..."
@@ -80,6 +99,7 @@ if [[ -f $configFile ]]; then
   rm $configFile
 fi
 
+# TODO make versions into a list and print supported versions on 'else' path
 if [[ $hlsVersion == "2017.2" ]]; then
   hlsPath_append=$hlsPath/$hlsVersion
 elif [[ $hlsVersion == "2017.4" ]]; then
@@ -122,6 +142,7 @@ if [[ "$#" == 8 ]]; then
   echo "export SHELLS_BOARD=$board" >> $configFile
 fi
 
+# TODO print supported boards as help
 cat >> $configFile <<EOF
 
 shells-update-board() {
@@ -133,6 +154,9 @@ shells-update-board() {
   if [[ \$1 == "pynq-z2" ]]; then
     partName=xc7z020clg400-1
     board=tul.com.tw:pynq-z2:part0:1.0
+  elif [[ \$1 == "zedboard" ]]; then
+    partName=xc7z020clg484-1    
+    board=em.avnet.com:zed:part0:1.3
   elif [[ \$1 == "sidewinder" ]]; then
     partName=xczu19eg-ffvc1760-2-i
     board=fidus.com:sidewinder100:part0:1.0
@@ -192,6 +216,9 @@ EOF
 source $configFile
 source $vivadoPath_append/settings64.sh
 
+# if it doesn't exist in the .bashrc, add it. Otherwise, uncomment it in case
 if ! grep -Fq "# added by shells" ~/.bashrc; then 
   echo "source $configFile # added by shells" >> ~/.bashrc
+else
+  sed -i '/# added by shells/s/^#//' ~/.bashrc
 fi
