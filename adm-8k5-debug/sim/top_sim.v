@@ -6,17 +6,17 @@ module top_sim(
     input clk,
     input sys_resetn,
     //from stimulus
-    input [7:0] keep,
-    input last,
-    input [63:0] data,
-    input valid,
-    output ready,
-    output [7:0] keep_out,
-    output last_out,
-    output [63:0] data_out,
-    output valid_out,
-    input ready_out,
-    input mem_sys_clk_n,
+    input [7:0] stream_in_TKEEP,
+    input stream_in_TLAST,
+    input [63:0] stream_in_TDATA,
+    input stream_in_TVALID,
+    output stream_in_TREADY,
+    output [7:0] stream_out_TKEEP,
+    output stream_out_TLAST,
+    output [63:0] stream_out_TDATA,
+    output stream_out_TVALID,
+    input stream_out_TREADY,
+   // input mem_sys_clk_n,
     input mem_sys_clk_p,
     output mem_ready
 
@@ -28,6 +28,8 @@ module top_sim(
    
 
  
+ wire mem_sys_clk_n;
+ assign mem_sys_clk_n = ~mem_sys_clk_p;
 
     //mem
     wire [14:0]S_AXI_MEM_0_araddr;
@@ -198,16 +200,16 @@ module top_sim(
     (
         .ARESETN(pr_resetn),
         .CLK(clk),
-        .M_AXIS_tdata(data_out),
-        .M_AXIS_tkeep(keep_out),
-        .M_AXIS_tlast(last_out),
-        .M_AXIS_tready(ready_out),
-        .M_AXIS_tvalid(valid_out),
-        .S_AXIS_tdata(data),
-        .S_AXIS_tkeep(keep),
-        .S_AXIS_tlast(last),
-        .S_AXIS_tready(ready),
-        .S_AXIS_tvalid(valid),
+        .M_AXIS_tdata(stream_out_TDATA),
+        .M_AXIS_tkeep(stream_out_TKEEP),
+        .M_AXIS_tlast(stream_out_TLAST),
+        .M_AXIS_tready(stream_out_TREADY),
+        .M_AXIS_tvalid(stream_out_TVALID),
+        .S_AXIS_tdata(stream_in_TDATA),
+        .S_AXIS_tkeep(stream_in_TKEEP),
+        .S_AXIS_tlast(stream_in_TLAST),
+        .S_AXIS_tready(stream_in_TREADY),
+        .S_AXIS_tvalid(stream_in_TVALID),
         .S_AXI_CONTROL_araddr(M_AXI_CONTROL_araddr),
         //.S_AXI_CONTROL_arprot(M_AXI_CONTROL_arprot),
         //.S_AXI_CONTROL_arqos(M_AXI_CONTROL_arqos),

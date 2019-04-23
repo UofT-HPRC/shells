@@ -24,6 +24,7 @@ if { $::argc > 0 } {
       "--pr_tcl" { incr i; set pr_tcl [lindex $::argv $i] }
       "--start_synth" { incr i; set start_synth [lindex $::argv $i] }
       "--dir" { incr i; set default_dir [lindex $::argv $i] }
+      "--sim_dir" { incr i; set sim_dir [lindex $::argv $i] }
       "--help"         { help }
       default {
         if { [regexp {^-} $option] } {
@@ -118,6 +119,7 @@ set obj [get_filesets sources_1]
 if {! [catch {glob $shell_path/srcs/*} yikes] } {
   set files [glob $shell_path/srcs/*]
   import_files -norecurse -fileset $obj $files
+  #add_files -norecurse -fileset $obj $files
 }
 
 create_bd_design "shell"
@@ -141,9 +143,23 @@ if {! [catch {glob $shell_path/sim/*} yikes] } {
   import_files -norecurse -fileset sim_1 $files
 }
 
+if { [info exists sim_dir] } {
+    set files [glob $sim_dir/*]
+    #import_files -norecurse -fileset sim_1 $files
+    add_files -norecurse -fileset sim_1 $files
+}
+
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
 set_property "top" "shellTop" $obj
+
+
+if { [info exists sim_dir] } {
+    create_bd_design "mem"
+    open_bd_design $project_path/$project_name.srcs/sources_1/bd/mem/mem.bd
+    source $shell_path/tclScripts/sim_mig.tcl
+    validate_bd_design
+}
 
 # Set 'sources_1' fileset object
 create_bd_design "pr"
