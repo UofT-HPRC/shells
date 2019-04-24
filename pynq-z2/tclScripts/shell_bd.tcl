@@ -8,9 +8,21 @@ proc get_script_folder {} {
 variable script_folder
 set script_folder [_tcl::get_script_folder]
 
-set supported_versions {2017.4}
+set supported_versions {2017.4, 2018.1}
 
 namespace eval 2017.4 {
+  set ip_list "\ 
+    xilinx.com:ip:axi_bram_ctrl:4.0\
+    xilinx.com:ip:axi_dma:7.1\
+    xilinx.com:ip:axi_gpio:2.0\
+    xilinx.com:ip:blk_mem_gen:8.4\
+    xilinx.com:ip:proc_sys_reset:5.0\
+    xilinx.com:ip:processing_system7:5.5\
+    xilinx.com:ip:xlconcat:2.1\
+  "
+}
+
+namespace eval 2018.1 {
   set ip_list "\ 
     xilinx.com:ip:axi_bram_ctrl:4.0\
     xilinx.com:ip:axi_dma:7.1\
