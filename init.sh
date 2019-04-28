@@ -26,6 +26,8 @@ find_family () {
       FPGA_type='Kintex'
     elif [[ $FPGA_type == 'v' ]]; then
       FPGA_type='Virtex'
+    elif [[ $FPGA_type == 'a' ]]; then
+      FPGA_type='Artix'
     elif [[ $FPGA_type == 'z' ]]; then
       FPGA_type='Zynq'
     else
@@ -157,6 +159,9 @@ shells-update-board() {
   elif [[ \$1 == "zedboard" ]]; then
     partName=xc7z020clg484-1    
     board=em.avnet.com:zed:part0:1.3
+  elif [[ \$1 == "nexys-video" ]]; then
+    partName=xc7a200Tsbg484-1
+    board="NULL"
   elif [[ \$1 == "sidewinder" ]]; then
     partName=xczu19eg-ffvc1760-2-i
     board=fidus.com:sidewinder100:part0:1.0
